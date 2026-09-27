@@ -220,11 +220,20 @@ function scanLine(line: string): LineScan {
  * Equal open/close counts per bracket family, exactly as §1 step 8 specifies (a count check, not a
  * LIFO depth check). Step 4 has already replaced every bracket INSIDE label text with a space, so
  * anything counted here is structural.
+ *
+ * The six counts are written out longhand rather than through a shared `count(ch)` helper, and that
+ * is deliberate — do not DRY this up. Such a helper has to close over `text`, and SWC's inliner in
+ * Next 14.2.x production builds mis-rewrites that closure: it substitutes the captured variable in
+ * the first expansion only and leaves the raw source name `text` in the remaining five. `text` is
+ * not bound in the emitted scope, so every production build threw `ReferenceError: text is not
+ * defined` on entry to this check, while `next dev` — which does not minify — was unaffected.
+ * Flat expressions give the inliner nothing to rewrite.
  */
 function isBalanced(text: string): boolean {
-  const count = (ch: string) => text.split(ch).length - 1;
   return (
-    count("[") === count("]") && count("(") === count(")") && count("{") === count("}")
+    text.split("[").length - 1 === text.split("]").length - 1 &&
+    text.split("(").length - 1 === text.split(")").length - 1 &&
+    text.split("{").length - 1 === text.split("}").length - 1
   );
 }
 
