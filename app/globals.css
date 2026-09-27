@@ -1,0 +1,551 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================================
+   WHAT-IF — NEO-BRUTALIST THEME
+   ----------------------------------------------------------------------------
+   Rules of the house:
+     · Every container / input / button / panel gets a 3px solid #000 border.
+     · Interactive + primary cards get a hard, zero-blur shadow: 5px 5px 0 #000.
+     · Pressed state translates (2px, 2px) and drops the shadow to 3px 3px 0 #000,
+       which keeps the bottom-right corner visually pinned.
+     · No border-radius anywhere. No blurred shadow anywhere. No glass, no blur.
+     · Transitions are limited to `transform` / `opacity` (≤150ms) so state
+       changes feel snappy and hard-edged rather than soft.
+   ========================================================================= */
+
+:root {
+  /* ── Canvas ───────────────────────────────────────────────────────────── */
+  --purple: #a855f7;
+  --purple-deep: #7e22ce;
+  --purple-ink: #581c87;
+  --paper: #ffffff;
+
+  /* ── Pop palette ──────────────────────────────────────────────────────── */
+  --cyan: #38bdf8;
+  --pink: #f472b6;
+  --lime: #4ade80;
+  --yellow: #facc15;
+  --yellow-soft: #fef08a;
+  --orange: #fb923c;
+  --red: #ef4444;
+
+  /* ── Ink ──────────────────────────────────────────────────────────────── */
+  --ink: #000000;
+
+  /* ── Back-compat aliases — existing components reference these names ───── */
+  --bg: var(--purple);
+  --bg-elevated: var(--paper);
+  --surface-alt: var(--yellow-soft);
+  --border: var(--ink);
+  --border-strong: var(--ink);
+  --text-primary: var(--ink);
+  --text-secondary: #3f3f46;
+  --accent: var(--cyan);
+  --accent-alt: var(--pink);
+  --error: var(--red);
+
+  /* ── Brutalist geometry ───────────────────────────────────────────────── */
+  --bw: 3px;
+  --shadow-hard: 5px 5px 0 var(--ink);
+  --shadow-hard-sm: 3px 3px 0 var(--ink);
+  --shadow-hard-md: 4px 4px 0 var(--ink);
+  --shadow-hard-lg: 8px 8px 0 var(--ink);
+
+  /* ── Retro grid (SVG data-URI — a line pattern, not a colour gradient) ─── */
+  --grid-cell: 48px;
+  --grid-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M48 0H0V48' fill='none' stroke='%23000000' stroke-opacity='0.13' stroke-width='2'/%3E%3C/svg%3E");
+  --grid-image-lg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cpath d='M96 0H0V96' fill='none' stroke='%23000000' stroke-opacity='0.10' stroke-width='3'/%3E%3C/svg%3E");
+}
+
+@layer base {
+  html,
+  body {
+    min-height: 100%;
+  }
+
+  body {
+    /* Purple canvas only. The grid is drawn by .nb-grid-overlay one layer UP, so it lands on top
+       of the drifting shapes — and drawing it in one place keeps it from being painted twice. */
+    background-color: var(--purple);
+    color: var(--text-primary);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Hard-edged focus ring — never a soft glow. */
+  :focus-visible {
+    outline: 3px dashed var(--ink);
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: var(--yellow);
+    color: var(--ink);
+  }
+
+  /* Brutalist scrollbars where the browser allows it. */
+  * {
+    scrollbar-color: var(--ink) var(--yellow-soft);
+  }
+}
+
+@layer components {
+  /* ── Surfaces ─────────────────────────────────────────────────────────── */
+
+  /** Thick bordered block. The atomic unit of the whole UI. */
+  .nb-block {
+    border: var(--bw) solid var(--ink);
+    border-radius: 0;
+    background: var(--paper);
+  }
+
+  /** Hard, non-blurry drop shadows. */
+  .nb-shadow {
+    box-shadow: var(--shadow-hard);
+  }
+  .nb-shadow-sm {
+    box-shadow: var(--shadow-hard-sm);
+  }
+  .nb-shadow-md {
+    box-shadow: var(--shadow-hard-md);
+  }
+  .nb-shadow-lg {
+    box-shadow: var(--shadow-hard-lg);
+  }
+
+  /** Primary card — bordered, shadowed, opaque. */
+  .nb-card {
+    border: var(--bw) solid var(--ink);
+    border-radius: 0;
+    background: var(--paper);
+    box-shadow: var(--shadow-hard);
+  }
+
+  /** Panel — bordered container that holds other cards, so no shadow of its own. */
+  .nb-panel {
+    border: var(--bw) solid var(--ink);
+    border-radius: 0;
+    background: var(--paper);
+  }
+
+  /** Yellow banner card — used for the hero wordmark and headlines. */
+  .nb-banner {
+    border: var(--bw) solid var(--ink);
+    border-radius: 0;
+    background: var(--yellow);
+    box-shadow: var(--shadow-hard-lg);
+  }
+
+  /**
+   * Speech-bubble tail for .nb-banner — two stacked triangles (black outline + yellow fill).
+   * Geometry: the containing block for an absolutely positioned child is the *padding* box, so
+   * every offset here is the visual offset minus the 3px border. Both triangle bases land on the
+   * bubble's outer bottom edge, which is why the base seams stay hidden under the border.
+   */
+  .nb-bubble {
+    position: relative;
+  }
+
+  .nb-bubble::before {
+    content: "";
+    position: absolute;
+    left: 2.5rem;
+    bottom: -25px;
+    width: 0;
+    height: 0;
+    border-left: 18px solid transparent;
+    border-right: 18px solid transparent;
+    border-top: 22px solid var(--ink);
+  }
+
+  .nb-bubble::after {
+    content: "";
+    position: absolute;
+    left: calc(2.5rem + 3px);
+    bottom: -22px;
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 19px solid var(--yellow);
+  }
+
+  /** Chunky tag chip — small uppercase label on a pop-colour block. */
+  .nb-chip {
+    display: inline-flex;
+    align-items: center;
+    border: var(--bw) solid var(--ink);
+    border-radius: 0;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.68rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+  }
+
+  /* ── Controls ─────────────────────────────────────────────────────────── */
+
+  /** Shared button base: thick border, hard shadow, uppercase bold label. */
+  .nb-btn {
+    border: var(--bw) solid var(--ink);
+    border-radius: 0;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: var(--shadow-hard);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: transform 120ms, box-shadow 120ms, opacity 120ms;
+    /* Never let a fast double-click select the label text mid-press. */
+    user-select: none;
+  }
+
+  /* Hover lifts the block off the page AND grows its shadow, so the bottom-right corner
+     appears pinned to the paper while the block rises. Snappy on purpose. */
+  .nb-btn:hover:not(:disabled) {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hard-lg);
+  }
+
+  .nb-btn:active:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: var(--shadow-hard-sm);
+  }
+
+  .nb-btn:disabled {
+    box-shadow: none;
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  /** Smaller sibling of .nb-btn for inline controls (zoom, theme chips). */
+  .nb-btn-sm {
+    border: var(--bw) solid var(--ink);
+    border-radius: 0;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: var(--shadow-hard-sm);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: transform 120ms, box-shadow 120ms, opacity 120ms;
+    user-select: none;
+  }
+
+  .nb-btn-sm:hover:not(:disabled) {
+    transform: translate(-2px, -2px);
+    box-shadow: var(--shadow-hard-md);
+  }
+
+  .nb-btn-sm:active:not(:disabled) {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  .nb-btn-sm:disabled {
+    box-shadow: none;
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  /** Text field: thick black border, hard shadow, black text on white. */
+  .nb-input {
+    border: var(--bw) solid var(--ink);
+    border-radius: 0;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: var(--shadow-hard);
+    font-weight: 600;
+    outline: none;
+    transition: transform 150ms;
+  }
+
+  .nb-input::placeholder {
+    color: #71717a;
+    font-weight: 500;
+  }
+
+  .nb-input:focus {
+    background: var(--yellow-soft);
+    box-shadow: var(--shadow-hard), 0 0 0 3px var(--cyan);
+  }
+
+  .nb-input[aria-invalid="true"] {
+    background: #fee2e2;
+    box-shadow: var(--shadow-hard), 0 0 0 3px var(--red);
+  }
+
+  /* ── Typography helpers ───────────────────────────────────────────────── */
+
+  /** Panel / section eyebrow. */
+  .nb-label {
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.72rem;
+    color: var(--ink);
+  }
+
+  /** Chunky display type for the hero wordmark. */
+  .nb-display {
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 0.9;
+    color: var(--ink);
+  }
+
+  /**
+   * The brand mark. Depth comes from stacked hard shadows (a pink plate, then black) — the same
+   * two-step offset a sticker gets, and not one blur anywhere. `-webkit-text-stroke` with
+   * `paint-order: stroke fill` draws the outline UNDER the glyph fill, so the letters stay white
+   * with a black edge no matter what sits behind them. Skewed, tight, and oversized: this is a
+   * logo, not a heading.
+   */
+  .nb-wordmark {
+    font-weight: 900;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: -0.045em;
+    line-height: 0.85;
+    color: var(--paper);
+    /* Everything here is sized in `em`, not px: the same mark is used at 30px in the header and
+       at 72px in the hero, and the outline and shadow have to keep the same visual weight at
+       both ends. */
+    -webkit-text-stroke: 0.04em var(--ink);
+    paint-order: stroke fill;
+    text-shadow: 0.03em 0.03em 0 var(--pink), 0.06em 0.06em 0 var(--ink);
+    transition: transform 140ms ease;
+    user-select: none;
+  }
+
+  .nb-wordmark:hover {
+    transform: translate(-2px, -2px) rotate(-2deg);
+  }
+
+  /**
+   * Text field hover: the shadow grows, the field does NOT move.
+   *
+   * Every other control lifts on hover, but translating an input would slide the thing you are
+   * about to click out from under the pointer. The shadow alone reads as "live".
+   */
+  /* The :not() guards matter: hovering must never outrank the focus ring, and it must never
+     repaint an invalid field's red ring as a plain black shadow. */
+  .nb-input:hover:not(:focus):not([aria-invalid="true"]) {
+    box-shadow: var(--shadow-hard-md);
+  }
+}
+
+@layer utilities {
+  /** Repeats the retro grid on any surface that needs its own canvas. */
+  .nb-grid {
+    background-image: var(--grid-image);
+  }
+  .nb-grid-lg {
+    background-image: var(--grid-image-lg);
+  }
+
+  .nb-no-select {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /**
+   * The diagram viewport's height. The panel is half the page wide, so the drawing needs vertical
+   * room it does not get from width alone. Grows with the window, then clamps at both ends: never
+   * so short that a graph is unreadable, never so tall that the panel outgrows the analogy beside
+   * it and pushes the crash card off the fold.
+   */
+  .nb-canvas {
+    height: clamp(440px, 58vh, 620px);
+  }
+}
+
+/* ── Ambient background layer ──────────────────────────────────────────── */
+
+/*
+ * Three stacked layers, painted in this order:
+ *   z-0  .nb-float-layer    — drifting shapes + cartoon stickers
+ *   z-1  .nb-grid-overlay   — the same grid the body carries, redrawn ON TOP of the shapes,
+ *                             so the decoration genuinely sits *behind* the grid
+ *   z-10 page content       — header + main (see app/layout.tsx)
+ * Both decoration layers are pointer-events:none, so nothing here can steal a click.
+ */
+
+.nb-float-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /* Subtle by design: the shapes are texture, not content. */
+  opacity: 0.5;
+  user-select: none;
+}
+
+.nb-grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image: var(--grid-image);
+}
+
+/** One drifting shape. Position/size/animation come inline; motion is deliberate and slow. */
+.nb-float {
+  position: absolute;
+  animation-duration: 44s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+}
+
+/* Alternating drift vectors, so neighbouring shapes never move in lockstep. */
+@keyframes nb-drift-a {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(26px, -34px, 0); }
+}
+
+@keyframes nb-drift-b {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-30px, 26px, 0); }
+}
+
+@keyframes nb-drift-c {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(20px, 38px, 0); }
+}
+
+/** Sticker plate — a rotated white card holding a cartoon icon. */
+.nb-sticker {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border: var(--bw) solid var(--ink);
+  border-radius: 0;
+  background: var(--paper);
+  box-shadow: var(--shadow-hard-md);
+}
+
+/* ── Skeleton ──────────────────────────────────────────────────────────── */
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.9; }
+}
+
+.skeleton-pulse {
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
+}
+
+/* ── Loading orbs ──────────────────────────────────────────────────────── */
+
+/*
+ * The loading indicator: a row of hard-bordered circles in the pop palette, bouncing and
+ * swelling out of phase. Brutalist rules still apply — every orb carries the same 3px outline
+ * and the same hard, zero-blur offset shadow as a button, so it reads as part of the page
+ * rather than a floating third-party spinner.
+ *
+ * Negative delays put every orb at a different point in the cycle from the very first frame,
+ * so the row is already mid-bounce instead of starting in a line.
+ */
+.nb-orbs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Sized so the whole row still clears a 320px phone minus its padding — the diagram canvas is
+     the narrowest box these ever sit in, and a wrapped orb row would break the rhythm. */
+  gap: 0.55rem;
+}
+
+.nb-orb {
+  height: 1.9rem;
+  width: 1.9rem;
+  border: var(--bw) solid var(--ink);
+  border-radius: 50%;
+  background: var(--orb, var(--cyan));
+  box-shadow: var(--shadow-hard-sm);
+  animation: nb-orb-bounce 720ms cubic-bezier(0.34, 1.56, 0.64, 1) infinite alternate;
+}
+
+/* One colour per orb, wrapping every six. Declared as a custom property so the bounce keyframes
+   can stay generic — nothing about the motion is per-orb except its delay. */
+.nb-orb:nth-child(6n + 1) { --orb: var(--cyan); animation-delay: -0ms; }
+.nb-orb:nth-child(6n + 2) { --orb: var(--pink); animation-delay: -120ms; }
+.nb-orb:nth-child(6n + 3) { --orb: var(--lime); animation-delay: -240ms; }
+.nb-orb:nth-child(6n + 4) { --orb: var(--yellow); animation-delay: -360ms; }
+.nb-orb:nth-child(6n + 5) { --orb: var(--red); animation-delay: -480ms; }
+.nb-orb:nth-child(6n + 6) { --orb: var(--paper); animation-delay: -600ms; }
+
+@keyframes nb-orb-bounce {
+  from { transform: translateY(9px) scale(0.82); }
+  to { transform: translateY(-13px) scale(1.12); }
+}
+
+/* ── Entry animation for panels that appear after a submit ─────────────── */
+
+@keyframes nb-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.nb-rise {
+  animation: nb-rise 200ms ease-out both;
+}
+
+/* ── Hero layout ───────────────────────────────────────────────────────── */
+
+/*
+ * Idle: the input sits dead-centre in the viewport with generous breathing room.
+ * Compact (post-submit): the hero collapses to a fixed, smaller height so the two
+ * heights are both lengths and the change animates smoothly instead of snapping.
+ */
+.nb-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  min-height: calc(100svh - 180px);
+  padding: 2rem 0;
+  transition: min-height 260ms ease, padding 260ms ease, gap 260ms ease;
+}
+
+.nb-hero--compact {
+  justify-content: flex-start;
+  gap: 1rem;
+  min-height: 0;
+  padding: 0 0 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-pulse,
+  .nb-rise,
+  .nb-float,
+  .nb-orb {
+    /* Animation off, but nothing disappears: the shapes stay rotated (the base rotation lives on
+       the inner element) and the orbs stay a row of coloured circles, which still reads as
+       "busy" without anything moving. */
+    animation: none;
+  }
+
+  .nb-hero,
+  .nb-btn,
+  .nb-btn-sm,
+  .nb-input,
+  .nb-wordmark {
+    transition: none;
+  }
+
+  /* The hover lift is motion too — pin the wordmark flat rather than teleporting it. */
+  .nb-wordmark:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,83 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules/
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+dist/
+
+# misc
+.DS_Store
+Thumbs.db
+*.pem
+*.lnk
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files — NEVER commit real keys. `.env.example` is the committed template.
+.env*
+!.env.example
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# ---------------------------------------------------------------------------
+# hackathon scratch / verification harnesses
+# Throwaway probe scripts, dumped DOM snapshots and chrome logs used while
+# verifying mermaid theming and the API routes. Regenerate locally as needed.
+# ---------------------------------------------------------------------------
+.tmp-*/
+.tmp-*.json
+
+# ---------------------------------------------------------------------------
+# local agent / editor tooling — machine-specific, never shipped
+# Claude Code config and skill bundles stay local-only and are never pushed.
+# The repo's own agent instructions are tracked separately, in AGENTS.md and
+# BOB.md — this rule does not touch those.
+# ---------------------------------------------------------------------------
+.claude/
+.agents/
+skills-lock.json
+
+# ---------------------------------------------------------------------------
+# large raw video renders
+# The Remotion demo-video project and all raw/source media stay local-only.
+# GitHub rejects or warns on files of this size, and they are not needed to
+# build or run WHAT-IF.
+# ---------------------------------------------------------------------------
+video/
+VIDEOS/
+*.mp4
+*.mov
+*.webm
+*.mkv
+*.wav
+*.mp3
+
+# ---------------------------------------------------------------------------
+# IBM Bob session logs & credentials
+# Bob task logs and any exported session credential must never reach GitHub.
+# Screenshots kept deliberately for judging live in ibm-bob-report/ and are
+# NOT covered by these rules. See .bobignore.
+# ---------------------------------------------------------------------------
+bob/logs/
+*.boblog
+bob-credentials.json
